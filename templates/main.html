@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+
+<head>
+	<title>&#129344; WWWater for Flowers</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
+	 crossorigin="anonymous">
+	<link rel="stylesheet" href="/static/styles.css">
+	<link rel="shortcut icon" href="/static/favicon.ico">
+</head>
+
+<body>
+	<nav class="navbar navbar-light bg-primary">
+		<h1>&#129344; &#8674;  WWWater for Flowers  &#8674; &#127799;</h1>
+	</nav>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Info</h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6 col-md-2">
+				<b>AUTO is:</b> {{auto}}
+			</div>
+			<div class="col-sm-6 col-md-2">
+				<b>Last feeding:</b> {{dateWatering}}
+			</div>
+			<div class="col-sm-6 col-md-2">
+				<b>Soil after was:</b> {{wasWet}}
+			</div>
+			<div class="col-sm-6 col-md-2">
+				<b>Status:</b> {{status}}
+			</div>
+			<div class="col-sm-6 col-md-2">
+				<b>Soil is now</b> {{isWet}} <a href="/action/read">read</a>
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Actions</h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-2 col-sm-6">
+				<button type="button" class="btn btn-outline-primary" onclick="navigate('/action/start')">AUTO ON</button>
+			</div>
+			<div class="col-md-2 col-sm-6">
+				<button type="button" class="btn btn-outline-primary" onclick="navigate('/action/stop')">AUTO OFF</button>
+			</div>
+			<div class="col-md-2 col-sm-6">
+				<button type="button" class="btn btn-outline-success" onclick="navigate('/action/feed')">Feed</button>
+			</div>
+			<div class="col-md-2 col-sm-6">
+				<button type="button" class="btn btn-outline-danger" onclick="navigate('/action/stopNow')">Stop</button>
+			</div>
+			<div class="col-md-2 col-sm-6">
+				<button type="button" class="btn btn-outline-danger" onclick="navigate('/action/clear_log')">Clear log</button>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Events</h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				{{events|safe}}
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Log</h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				{{log|safe}}
+			</div>
+		</div>
+	</div>
+
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
+	 crossorigin="anonymous"></script>
+	  <script src="/static/scripts.js"></script>
+</body>
+
+</html>
