@@ -8,9 +8,9 @@ status_file = os.path.join(path, "status.bin")
 
 class Status:
     auto = True
-    feed_duration = 60
-    feed_pause = 30
-    feed_iterations = 5
+    feed_duration = 90
+    feed_pause = 60
+    feed_iterations = 2
     status = "PAUSE"
     last_watering = datetime.datetime.now()
     soil_was_wet_after = False
@@ -21,15 +21,6 @@ class Status:
         if os.path.isfile(status_file):
             self.load()
         else:
-            self.auto = True
-            self.feed_duration = 60
-            self.feed_pause = 30
-            self.feed_iterations = 5
-            self.status = "PAUSE"
-            self.last_watering = datetime.datetime.now()
-            self.soil_was_wet_after = False
-            self.last_reading = datetime.datetime.now()
-            self.soil_was_wet = False
             self.save()
 
 

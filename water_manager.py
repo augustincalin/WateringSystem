@@ -31,16 +31,17 @@ def initialize():
 
 
 def checkIsWet():
-
     initialize()
-    writeLog("Sensor ON", "INFO")
     GPIO.output(port_sensor_cmd, GPIO.HIGH)
-    time.sleep(2)
-    writeLog("Read Sensor", "INFO")
-    value = GPIO.input(port_sensor_read) == 0
-    writeLog("Sensor OFF", "INFO")
+    time.sleep(1)
+    wetCount = 0
+    for x in range(0,100):
+        value = GPIO.input(port_sensor_read) == 0
+        if value == True:
+            wetCount += 1
+    value = wetCount > 70
     GPIO.output(port_sensor_cmd, GPIO.LOW)
-    writeLog("Value read: {0}".format(value), "INFO")
+    writeLog("WET readings {1} / 100. Is WET?: {0}".format(value, wetCount), "INFO")
     status.last_reading = datetime.datetime.now()
     status.soil_was_wet = value
     GPIO.cleanup()
@@ -49,24 +50,20 @@ def checkIsWet():
 
 def turnOnPump():
     initialize()
-    writeLog("Pump ON", "INFO")
     GPIO.output(port_pump_cmd, GPIO.HIGH)
 
 
 def turnOffPump():
     initialize()
-    writeLog("Pump OFF", "INFO")
     GPIO.output(port_pump_cmd, GPIO.LOW)
 
 
 def feed():
-    writeLog("Turn ON pump", "INFO")
     turnOnPump()
     status.status = "FEEDING"
     status.save()
     writeLog("Feeding for {0}s...".format(feed_duration), "INFO")
     time.sleep(feed_duration)
-    writeLog("Turn OFF pump", "INFO")
     turnOffPump()
     status.status = "PAUSE"
     status.save()
@@ -111,7 +108,7 @@ def doWork():
             if not isWet:
                 writeLog("After {0} feeding cycles the soil is still dry. Check the water level in tank!".format(feed_iterations), "ERROR")
         else:
-            writeLog("AUTO is off", "INFO")
+            writeLog("AUTO is off, no action", "INFO")
     except KeyboardInterrupt:
         writeLog("Cleanup GPIO ports", "INFO")
         GPIO.cleanup()

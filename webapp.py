@@ -1,10 +1,16 @@
 from flask import Flask, flash, render_template, redirect, url_for, request, session, abort
 import water_manager as mgr
 import status
+import os
+import sys
+import datetime
+
 
 app = Flask(__name__)
+path = sys.path[0]
 app.secret_key = "a secret key"
 status = status.Status()
+log_filename = os.path.join(path, "log.txt")
 
 def getModel(dateWatering='UNK', wasWet='UNK', isWetNow='UNK', statusMessage = "UNK"):
     status.load()
@@ -15,7 +21,8 @@ def getModel(dateWatering='UNK', wasWet='UNK', isWetNow='UNK', statusMessage = "
         'isWet': get_wet_dry(mgr.checkIsWet()),
         'log': readLog(),
         'events': [],
-        'status': status.status
+        'status': status.status,
+        'title': 'WWWater @{0}'.format(datetime.datetime.now())
     }
     return viewModel
 
@@ -25,7 +32,7 @@ def get_wet_dry(isWet):
 
 def readLog():
     result = '-'
-    with open('log.txt') as f:
+    with open(log_filename) as f:
         line = f.readline()
         while line:
             result = '<p class='+getClass(line)+'>'+line.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')+'</p>' + result
