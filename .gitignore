@@ -2,3 +2,4 @@ __pycache__
 .vscode
 log.txt
 status.pyc
+status.bin
