@@ -17,17 +17,14 @@ def getModel(dateWatering='UNK', wasWet='UNK', isWetNow='UNK', statusMessage = "
     viewModel = {
         'auto': "ON" if status.auto else "OFF",
         'dateWatering': status.last_watering.strftime("%x %X"),
-        'wasWet': get_wet_dry(status.soil_was_wet_after),
-        'isWet': get_wet_dry(mgr.checkIsWet()),
+        'wasWet': mgr.get_wet_dry(status.soil_was_wet_after),
+        'isWet': mgr.get_wet_dry(mgr.checkIsWet()),
         'log': readLog(),
         'events': [],
         'status': status.status,
         'title': 'WWWater @{0}'.format(datetime.datetime.now())
     }
     return viewModel
-
-def get_wet_dry(isWet):
-    return "WET" if isWet else "DRY"
 
 
 def readLog():
