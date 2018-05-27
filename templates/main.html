@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <head>
-	<title>&#127799; {{title}}</title>
+	<title>{{title}}</title>
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4"
 	 crossorigin="anonymous">
 	<link rel="stylesheet" href="/static/styles.css">
@@ -36,7 +36,7 @@
 				<b>Soil is now</b> {{isWet}} <a href="/action/read">read</a>
 			</div>
 		</div>
-		
+
 		<div class="row">
 			<div class="col-md-12">
 				<h2>Actions</h2>
@@ -58,32 +58,40 @@
 			<div class="col-md-2 col-sm-6">
 				<button type="button" class="btn btn-outline-danger" onclick="navigate('/action/clear_log')">Clear log</button>
 			</div>
-		</div>
-		<div class="row">
-			<div class="col-md-12">
-				<h2>Events</h2>
+			<div class="col-md-2 col-sm-6">
+				<button type="button" class="btn btn-outline-danger" onclick="navigate('/action/clear_history')">Clear history</button>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-md-12">
-				{{events|safe}}
+				<h2>Weather history</h2>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-md-12">
+				<iframe width="100%" height="300" frameBorder="0" src="https://www.wetterkontor.de/de/wetter/deutschland/rueckblick.asp?id=2910&datum={{day}}.{{month}}.{{year}}&t=2#tabelle"></iframe>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-8">
 				<h2>Log</h2>
 			</div>
+			<div class="col-md-4">
+				<h2>History</h2>
+			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-8">
 				{{log|safe}}
 			</div>
+			<div class="col-md-4">{{history|safe}}</div>
 		</div>
 	</div>
 
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm"
 	 crossorigin="anonymous"></script>
-	  <script src="/static/scripts.js"></script>
+	<script src="/static/scripts.js"></script>
 </body>
 
 </html>

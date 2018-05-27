@@ -16,10 +16,10 @@ def initialize():
 def check():
     initialize()
     GPIO.output(port_sensor_cmd, GPIO.HIGH)
-    time.sleep(10)
+    time.sleep(5)
     wetCount = 0
     for x in range(0,100):
-        time.sleep(2)
+        time.sleep(0.1)
         value = GPIO.input(port_sensor_read) == 0
         if value == True:
             wetCount += 1

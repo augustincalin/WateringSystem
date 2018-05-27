@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import status
 import sys
 import os
+import tailhead
 
 status = status.Status()
 path = sys.path[0]
@@ -17,10 +18,11 @@ feed_pause = status.feed_pause
 feed_iterations = status.feed_iterations
 
 log_filename = os.path.join(path, "log.txt")
+history_filename = os.path.join(path, "history.txt")
 settings_filename = os.path.join(path, "settings.txt")
 events_filename = os.path.join(path, "events.txt")
 
-shouldWork = status.auto
+autoIsOn = status.auto
 
 
 def initialize():
@@ -33,17 +35,13 @@ def initialize():
 def checkIsWet():
     initialize()
     GPIO.output(port_sensor_cmd, GPIO.HIGH)
-    time.sleep(1)
-    wetCount = 0
-    for x in range(0,100):
-        value = GPIO.input(port_sensor_read) == 0
-        if value == True:
-            wetCount += 1
-    value = wetCount > 70
+    time.sleep(2)
+    value = GPIO.input(port_sensor_read) == 0
     GPIO.output(port_sensor_cmd, GPIO.LOW)
-    writeLog("WET readings {1} / 100. The soil is {0}.".format(get_wet_dry(value), wetCount), "INFO" if value else "WARN")
+    writeHistory(value)
     status.last_reading = datetime.datetime.now()
     status.soil_was_wet = value
+    status.save()
     GPIO.cleanup()
     return value
 
@@ -66,9 +64,9 @@ def feed():
     time.sleep(feed_duration)
     turnOffPump()
     status.status = "PAUSE"
+    status.last_watering = datetime.datetime.now()
     status.save()
-    writeLog("Pause for {0}s...".format(feed_pause), "INFO")
-    time.sleep(feed_pause)
+
 
 
 def writeLog(message, errorLevel):
@@ -79,6 +77,12 @@ def writeLog(message, errorLevel):
     file.write(line)
     file.close()
 
+def writeHistory(value):
+    line = str(datetime.datetime.now())+"\t"+get_wet_dry(value)+"\r\n"
+    file = open(history_filename, 'a+')
+    file.write(line)
+    file.close()
+
 
 def get_wet_dry(isWet):
     return "WET" if isWet else "DRY"
@@ -86,33 +90,39 @@ def get_wet_dry(isWet):
 
 def stopWork():
     GPIO.cleanup()
-    shouldWork = False
+    autoIsOn = False
+    status.auto = autoIsOn
+    status.save()
+
+def last_reads_are_dry(count):
+    return tailhead.tail(open(history_filename), count).count("DRY") == count
+
+def shouldWork(isWet):
+    result = False
+    
+    if not isWet:
+        now = datetime.datetime.now()
+        if(now.hour >= 20 and now.hour <=23 or now.hour >= 6 and now.hour<=9):
+            if last_reads_are_dry(6):
+                result = True
+    return result
 
 def doWork():
     status.load()
     try:
-        shouldWork = status.auto
-        if shouldWork:
-            writeLog("AUTO is ON, start working.", "INFO")
-            counter = 1
+        autoIsOn = status.auto
+        isWet = checkIsWet()
+        sw = shouldWork(isWet)
+        s = "AUTO: {0}; SOIL: {1}; SHOULD_WORK: {2}".format(autoIsOn, get_wet_dry(isWet), sw)
+        writeLog(s, "INFO" if isWet else "WARN")
+        if sw:
+            writeLog("Start watering.", "INFO")
+            feed()
             isWet = checkIsWet()
-            s = "Soil is {0}, ".format(get_wet_dry(isWet)) + "no work to be done." if isWet else "start watering."
-            writeLog(s, "INFO" if isWet else "WARN")
-            while not isWet and counter <= feed_iterations and shouldWork:
-                writeLog("Start watering cycle #{0}/{1}.".format(counter, feed_iterations), "INFO")
-                feed()
-                status.last_watering = datetime.datetime.now()
-                status.save()
-                isWet = checkIsWet()
-                status.soil_was_wet_after = isWet
-                status.save()
-
-                writeLog("After watering cycle #{1} the soil is {0}.".format(get_wet_dry(isWet), counter), "INFO" if isWet else "WARN")
-                counter += 1
-            if not isWet:
-                writeLog("After {0} feeding cycles the soil is still DRY. Check the water level in tank!".format(feed_iterations), "ERROR")
-        else:
-            writeLog("AUTO is off, no action.", "INFO")
+            status.last_watering = datetime.datetime.now()
+            status.soil_was_wet_after = isWet
+            status.save()
+            writeLog("After watering the soil is {0}.".format(get_wet_dry(isWet)), "INFO" if isWet else "ERROR")
     except KeyboardInterrupt:
         writeLog("Cleanup GPIO ports", "INFO")
         GPIO.cleanup()
@@ -120,5 +130,5 @@ def doWork():
         status.save()
 
 if __name__ == '__main__':
-    writeLog("Manager called from outside", "INFO")
+    writeLog("Manager called from crontab", "INFO")
     doWork()

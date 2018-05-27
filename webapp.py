@@ -6,11 +6,13 @@ import sys
 import datetime
 
 
+
 app = Flask(__name__)
 path = sys.path[0]
 app.secret_key = "a secret key"
 status = status.Status()
 log_filename = os.path.join(path, "log.txt")
+history_filename = os.path.join(path, "history.txt")
 
 def getModel(dateWatering='UNK', wasWet='UNK', isWetNow='UNK', statusMessage = "UNK"):
     status.load()
@@ -20,9 +22,13 @@ def getModel(dateWatering='UNK', wasWet='UNK', isWetNow='UNK', statusMessage = "
         'wasWet': mgr.get_wet_dry(status.soil_was_wet_after),
         'isWet': mgr.get_wet_dry(mgr.checkIsWet()),
         'log': readLog(),
+        'history': readHistory(),
         'events': [],
         'status': status.status,
-        'title': 'WWWater @{0}'.format(datetime.datetime.now())
+        'title': 'WWWater @{0}'.format(datetime.datetime.now()),
+        'day': (datetime.datetime.today()-datetime.timedelta(days=1)).day,
+        'month':(datetime.datetime.today()-datetime.timedelta(days=1)).month,
+        'year':(datetime.datetime.today()-datetime.timedelta(days=1)).year,
     }
     return viewModel
 
@@ -33,6 +39,15 @@ def readLog():
         line = f.readline()
         while line:
             result = '<p class='+getClass(line)+'>'+line.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')+'</p>' + result
+            line = f.readline()
+    return result
+
+def readHistory():
+    result = '-'
+    with open(history_filename) as f:
+        line = f.readline()
+        while line:
+            result = '<p>'+line+'</p>'+result
             line = f.readline()
     return result
 
@@ -69,6 +84,12 @@ def clearLog():
         open('log.txt', 'w')
         return redirect(url_for('index'))
 
+@app.route("/action/clear_history")
+def clearHistory():
+    if checkLogin():
+        open('history.txt', 'w')
+        return redirect(url_for('index'))
+
 @app.route("/action/start")
 def startAutoWatering():
     if checkLogin():
@@ -86,7 +107,7 @@ def stopAutoWatering():
 @app.route("/action/stopNow")
 def stopNow():
     if checkLogin():
-        mgr.shouldWork = False
+        mgr.autoIsOn = False
         mgr.stopWork()
         return redirect(url_for('index'))
 
