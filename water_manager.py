@@ -137,5 +137,4 @@ def doWork():
 
 if __name__ == '__main__':
     writeLog("Manager called from crontab", "INFO")
-    writeLog(path, "INFO")
     doWork()
