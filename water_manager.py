@@ -57,6 +57,7 @@ def turnOffPump():
 
 
 def feed():
+    writeLog(path, "INFO")
     turnOnPump()
     status.status = "FEEDING"
     status.save()
@@ -95,15 +96,20 @@ def stopWork():
     status.save()
 
 def last_reads_are_dry(count):
-    return tailhead.tail(open(history_filename), count).count("DRY") == count
+    x = tailhead.tail(open(history_filename, 'rb'), count)
+    dryCount = 0
+    for i in x:
+        if i.decode("utf-8").count("DRY")>0:
+            dryCount += 1
+    return dryCount == count
 
 def shouldWork(isWet):
     result = False
     
     if not isWet:
         now = datetime.datetime.now()
-        if(now.hour >= 20 and now.hour <=23 or now.hour >= 6 and now.hour<=9):
-            if last_reads_are_dry(6):
+        if (now.hour >= 19 and now.hour <=23) or (now.hour >= 3 and now.hour<=9):
+            if last_reads_are_dry(5):
                 result = True
     return result
 
@@ -131,4 +137,5 @@ def doWork():
 
 if __name__ == '__main__':
     writeLog("Manager called from crontab", "INFO")
+    writeLog(path, "INFO")
     doWork()

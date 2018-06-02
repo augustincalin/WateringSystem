@@ -5,10 +5,11 @@ import sys
 
 path = sys.path[0]
 status_file = os.path.join(path, "status.bin")
+print(sys.path)
 
 class Status:
     auto = True
-    feed_duration = 90
+    feed_duration = 120
     feed_pause = 60
     feed_iterations = 2
     status = "PAUSE"
@@ -21,6 +22,15 @@ class Status:
         if os.path.isfile(status_file):
             self.load()
         else:
+            self.auto = True
+            self.feed_duration = 120
+            self.feed_pause = 60
+            self.feed_iterations = 2
+            self.status = "PAUSE"
+            self.last_watering = datetime.datetime.now()
+            self.soil_was_wet_after = False
+            self.last_reading = datetime.datetime.now()
+            self.soil_was_wet = False
             self.save()
 
 
@@ -30,6 +40,7 @@ class Status:
 
     def load(self):
         value = pickle.load(open(status_file, 'rb'))
+        print(value.feed_duration)
         self.auto = value.auto
         self.feed_duration = value.feed_duration
         self.feed_iterations = value.feed_iterations
@@ -39,5 +50,6 @@ class Status:
         self.soil_was_wet = value.soil_was_wet
         self.soil_was_wet_after = value.soil_was_wet_after
         self.status = value.status
+
 
 
